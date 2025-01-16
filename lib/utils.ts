@@ -1,6 +1,6 @@
 /* eslint-disable no-prototype-builtins */
+import { parse, stringify, stringifyUrl } from "query-string";
 import { type ClassValue, clsx } from "clsx";
-import qs from "query-string";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -21,8 +21,8 @@ export const formatDateTime = (dateString: Date) => {
   const dateDayOptions: Intl.DateTimeFormatOptions = {
     weekday: "short", // abbreviated weekday name (e.g., 'Mon')
     year: "numeric", // numeric year (e.g., '2023')
-    month: "2-digit", // abbreviated month name (e.g., 'Oct')
-    day: "2-digit", // numeric day of the month (e.g., '25')
+    month: "2-digit", // 2-digit month (e.g., '10')
+    day: "2-digit", // 2-digit day of the month (e.g., '25')
   };
 
   const dateOptions: Intl.DateTimeFormatOptions = {
@@ -66,12 +66,11 @@ export const formatDateTime = (dateString: Date) => {
 };
 
 export function formatAmount(amount: number): string {
-  const formatter = new Intl.NumberFormat("en-US", {
+  const formatter = new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "USD",
+    currency: "INR",
     minimumFractionDigits: 2,
   });
-
   return formatter.format(amount);
 }
 
@@ -88,11 +87,10 @@ interface UrlQueryParams {
 }
 
 export function formUrlQuery({ params, key, value }: UrlQueryParams) {
-  const currentUrl = qs.parse(params);
-
+  const currentUrl = parse(params);
   currentUrl[key] = value;
 
-  return qs.stringifyUrl(
+  return stringifyUrl(
     {
       url: window.location.pathname,
       query: currentUrl,
@@ -135,47 +133,26 @@ export function countTransactionCategories(
   const categoryCounts: { [category: string]: number } = {};
   let totalCount = 0;
 
-  // Iterate over each transaction
-  transactions &&
-    transactions.forEach((transaction) => {
-      // Extract the category from the transaction
-      const category = transaction.category;
+  transactions.forEach((transaction) => {
+    const category = transaction.category;
 
-      // If the category exists in the categoryCounts object, increment its count
-      if (categoryCounts.hasOwnProperty(category)) {
-        categoryCounts[category]++;
-      } else {
-        // Otherwise, initialize the count to 1
-        categoryCounts[category] = 1;
-      }
+    if (categoryCounts[category]) {
+      categoryCounts[category]++;
+    } else {
+      categoryCounts[category] = 1;
+    }
 
-      // Increment total count
-      totalCount++;
-    });
+    totalCount++;
+  });
 
-  // Convert the categoryCounts object to an array of objects
-  const aggregatedCategories: CategoryCount[] = Object.keys(categoryCounts).map(
-    (category) => ({
-      name: category,
-      count: categoryCounts[category],
-      totalCount,
-    })
-  );
-
-  // Sort the aggregatedCategories array by count in descending order
-  aggregatedCategories.sort((a, b) => b.count - a.count);
-
-  return aggregatedCategories;
+  return Object.entries(categoryCounts)
+    .map(([name, count]) => ({ name, count, totalCount }))
+    .sort((a, b) => b.count - a.count);
 }
 
 export function extractCustomerIdFromUrl(url: string) {
-  // Split the URL string by '/'
   const parts = url.split("/");
-
-  // Extract the last part, which represents the customer ID
-  const customerId = parts[parts.length - 1];
-
-  return customerId;
+  return parts[parts.length - 1];
 }
 
 export function encryptId(id: string) {
