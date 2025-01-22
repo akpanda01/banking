@@ -1,13 +1,14 @@
 "use client"
 import { useEffect, useState } from "react";
-import AnimatedCounter from "./AnimatedCounter";
-import DoughnutChart from "../DoughnutChart";
+import AnimatedCounter from "../components/AnimatedCounter";
+import DoughnutChart from "../components/DoughnutChart";
 
+// Corrected prop type name
 const TotalBalanceBox = ({ 
   accounts = [], 
   totalBanks, 
   totalCurrentBalance 
-}: TotlaBalanceBoxProps) => {
+}: TotlaBalanceBoxProps) => {  // Corrected here
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
